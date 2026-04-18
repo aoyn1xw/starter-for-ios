@@ -7,6 +7,34 @@ let client = Client()
 
 let account = Account(client)
 
+extension Client {
+    func ping() async throws -> String {
+        let url = URL(string: endPoint + "/ping")!
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+
+        headers.forEach { key, value in
+            request.setValue(value, forHTTPHeaderField: key)
+        }
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw NSError(domain: "InvalidResponse", code: 0)
+        }
+
+        guard httpResponse.statusCode == 200 else {
+            throw NSError(
+                domain: "PingError",
+                code: httpResponse.statusCode,
+                userInfo: [NSLocalizedDescriptionKey: "Request failed with status code \(httpResponse.statusCode)"]
+            )
+        }
+
+        return String(data: data, encoding: .utf8) ?? "pong"
+    }
+}
+
 /// A class that provides convenient access to Appwrite API methods for interacting with the project, account, and databases.
 class AppwriteSDK: ObservableObject {
     private let APPWRITE_PROJECT_ID = "698239cb000237ba7193"
