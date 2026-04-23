@@ -46,6 +46,28 @@ To create a production build of your app:
 
 This repository includes a CI workflow at `.github/workflows/build-ipa.yml` that builds an iOS archive and publishes an `.ipa` as a workflow artifact (`AppwriteStarterKit-ipa`) on every push to `main`, pull request, or manual dispatch.
 
+### OTA install from GitHub Releases
+
+If you want the app to install through `itms-services`, add the signed release workflow at `.github/workflows/release-ota.yml`. It builds a signed `.ipa`, generates a matching `.plist` manifest, and uploads both files to the same GitHub Release.
+
+Add these repository secrets before running the release workflow:
+
+- `IOS_CERT_P12_BASE64`
+- `IOS_CERT_P12_PASSWORD`
+- `IOS_PROVISIONING_PROFILE_BASE64`
+
+Store the `.p12` and `.mobileprovision` contents as base64-encoded values in those secrets, and set the password secret to your certificate password.
+
+The workflow uses the release tag to build a direct asset URL like:
+
+`https://github.com/OWNER/REPO/releases/download/v1.0/AppwriteStarterKit.ipa`
+
+The manifest URL then becomes:
+
+`itms-services://?action=download-manifest&url=https://github.com/OWNER/REPO/releases/download/v1.0/AppwriteStarterKit.plist`
+
+If you want to host the manifest in a separate dedicated repository, copy the same workflow there and point the manifest link at that repo's release asset URL.
+
 ---
 
 ## 💡 Additional Notes
